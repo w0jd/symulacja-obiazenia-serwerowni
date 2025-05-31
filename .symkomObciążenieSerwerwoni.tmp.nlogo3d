@@ -89,9 +89,9 @@ to sendTask
 set possitionOfMinWorkload min-one-of computers with [color != grey] [workload]
   ifelse   possitionOfMinWorkload != nobody  [
     ask tasks with [color = green][
-      ifelse min-one-of computers with [color = green] [workload] != nobody[
+      ifelse min-one-of computers with [color = green] [workload][
       move-to min-one-of computers with [color = green] [workload]][
-      move-to min-one-of computers with [color = yellow] [workload]]
+      move-to min-one-of computers with [color != grey] [workload]]
 
     ]][
     ask tasks with [color = green][
