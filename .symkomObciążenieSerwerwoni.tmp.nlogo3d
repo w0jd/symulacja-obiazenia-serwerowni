@@ -45,24 +45,25 @@ to Step
 
   ask tasks with [color = red][die]
   ask  tasks  [
-    if  any? computers-here [
+    if  any? computers in-radius 3  [
       set color white
-      ask computers-here with [ color = grey] [
+      ask computers in-radius 3 with [ color = grey] [
         ifelse  timeLeft > 0[
           set timeLeft timeLeft - 1 ]
         [set color green
-        ask tasks-here with [color = green or color = blue][
+        ask tasks in-radius 3 with [color = white or color = blue][
             set color blue
             if timeLeftTask > 0[
             set timeLeftTask timeLeftTask - 1  ]]]]
-      ask computers-here with [ color = green] [
+      ask computers in-radius 3 with [ color = green] [
         ask tasks-here  [
              set color blue
           if timeLeftTask > 0[
              set timeLeftTask timeLeftTask - 1]
           if timeLeftTask = 0[  set color red  ]]]]
 
-    ask tasks with [color = green][
+    ask tasks with [color = white][
+      forward 0.
       ]]
 
 end
@@ -89,13 +90,16 @@ to sendTask
 set possitionOfMinWorkload min-one-of computers with [color != grey] [workload]
   ifelse   possitionOfMinWorkload != nobody  [
     ask tasks with [color = green][
-      ifelse min-one-of computers with [color = green] [workload][
-      move-to min-one-of computers with [color = green] [workload]][
-      move-to min-one-of computers with [color != grey] [workload]]
-
+      ifelse min-one-of computers with [color = green] [workload] != nobody[
+      face min-one-of computers with [color = green] [workload]
+      set color white
+      ][
+      face min-one-of computers with [color = yellow] [workload]]
+      set color white
     ]][
     ask tasks with [color = green][
-      move-to min-one-of computers with [color = grey] [workload]
+      face min-one-of computers with [color = grey] [workload]
+      set color white
     ]
   ]
 end
