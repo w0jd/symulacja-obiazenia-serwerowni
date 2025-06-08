@@ -57,8 +57,7 @@ to Step
          set workload workload + computerWorkloadGlobal
         ][
          set color red
-        ]
-      ]
+        ]]
       ask computers in-radius 3 with [ color = grey] [
         ifelse  timeLeft > 0[
           set timeLeft timeLeft - 1 ]
@@ -68,16 +67,21 @@ to Step
             set color blue
             if timeLeftTask > 0[
             set timeLeftTask timeLeftTask - 1  ]]]]
-      ask computers in-radius 3 with [ color = green] [
+      ask computers in-radius 3 with [ color = green or color = yellow or color = orange] [
         ask tasks in-radius 3  [
              set color blue
           if timeLeftTask > 0[
              set timeLeftTask timeLeftTask - 1]
-          if timeLeftTask = 0[  set color red  ]]]
 
+          if timeLeftTask = 0[  set color red  ]]]]
+
+     ask computers in-radius 3 [
+        ask tasks in-radius 3 with [color = red][
+         set computerWorkloadGlobal difficulty * 10
+        ]
+
+         set workload workload - computerWorkloadGlobal
     ]
-
-
     ask tasks with [color = white][
       forward 0.1
       ]]
