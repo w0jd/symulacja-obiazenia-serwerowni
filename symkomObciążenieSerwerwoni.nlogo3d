@@ -42,25 +42,41 @@ end
 to Step
     sendTask
   taskGenerate
-
+  set computerWorkloadGlobal 0
   ask tasks with [color = red][die]
+
   ask  tasks  [
     if  any? computers in-radius 3  [
+
       set color white
+      ask computers in-radius 3 with [color != white and color != grey][
+        ask tasks in-radius 3 with [color = white][
+         set computerWorkloadGlobal difficulty * 10
+        ]
+        ifelse workload + computerWorkloadGlobal < 100[
+         set workload workload + computerWorkloadGlobal
+        ][
+         set color red
+        ]
+      ]
       ask computers in-radius 3 with [ color = grey] [
         ifelse  timeLeft > 0[
           set timeLeft timeLeft - 1 ]
         [set color green
+
         ask tasks in-radius 3 with [color = white or color = blue][
             set color blue
             if timeLeftTask > 0[
             set timeLeftTask timeLeftTask - 1  ]]]]
       ask computers in-radius 3 with [ color = green] [
-        ask tasks-here  [
+        ask tasks in-radius 3  [
              set color blue
           if timeLeftTask > 0[
              set timeLeftTask timeLeftTask - 1]
-          if timeLeftTask = 0[  set color red  ]]]]
+          if timeLeftTask = 0[  set color red  ]]]
+
+    ]
+
 
     ask tasks with [color = white][
       forward 0.1
