@@ -1,13 +1,14 @@
 globals[
-limit1
+
 limit2
-computersNum
+
   didGenerate
   angle
   tymczas
 choosenComputer
 computerWorkloadGlobal
 possitionOfMinWorkload
+  computersNum2
 
 ]
 breed [computers computer]
@@ -22,77 +23,149 @@ isOn
 workload
 state
 timeLeft
+
+  timeToturnOff2
+  nr
 ]
 to Setup
-  set tymczas  2
+
+
+  set tymczas 0
+  if computersNum < 1
+  [
+  set computersNum 1
+  ]
   clear-all
 	clear-ticks
-  set computersNum 1
-  create-computers computersNum [
+  set timeToturnOff 15
+  set computersNum2 computersNum
+  while [computersNum2 > 0][
+  create-computers 1 [
     set color grey
-    setxy 0 0
+    setxy 7 tymczas
     set shape "box"
-    set timeLeft random 10
+    set timeLeft random 20
+      set timeToturnOff 10
+    setxy 5 -14 + tymczas
     set state "off"
     set isOn false
-    set size 3
+    set size 2
     set workload 0
+    set tymczas tymczas + 5
+    set computersNum2  computersNum2 - 1
+     set nr nr + 1
   ]
+  ]
+
+end
+to workLoadStatusUpdate
+  ask computers with[ color = green][
+
+    ;;show workload
+    if workload >= limit1 [
+      ;;show workload
+    ;;show limit1
+      set color yellow
+    ]
+  ]
+  ask computers with[ color = yellow][
+    if workload < limit1 [
+      set color green
+    ]
+  ]
+  ;;show "aaab"
 end
 to Step
-    sendTask
+   if timeToturnOff <= 0[
+    set timeToturnOff 0
+   ]
   taskGenerate
   set computerWorkloadGlobal 0
   ask tasks with [color = red][die]
   ask computers with [color = red][set color yellow]
-  ask  tasks  [
-    if  any? computers in-radius 1  [
 
-      set color white
-      ask computers in-radius 1 with [color != white and color != grey][
-        ask tasks in-radius 1 with [color = white][
+  ask computers with [color != grey or color != white][
+      ifelse not any? tasks in-radius 3[
+        ;set workload 10
+        set timeToturnOff2 timeToturnOff2 - 1
+        set timeLeft random 20
+    ][
+    set timeToturnOff2 timeToturnOff
+
+    ]
+  ]
+  ask computers with [timeToturnOff2 = 0][
+    set color grey
+  ]
+  workLoadStatusUpdate
+   sendTask
+  ask  tasks  [
+
+    if  any? computers in-radius 2  [
+
+      ;set color white
+      ask computers in-radius 2 with [color != white or color != grey][
+        ask tasks in-radius 2 with [color = white][
          set computerWorkloadGlobal difficulty * 10
+            ;;show "teretycznie diff"
+          ;;show difficulty
+                   ;;show "partkycznie diff"
+          ;;show difficulty * 10
+          ;;show "teretycznie workload"
 
         ]
         ifelse workload + computerWorkloadGlobal < 100[
-         set workload workload + computerWorkloadGlobal
-           show workload
+
+          ;;show workload + computerWorkloadGlobal
+          set workload workload + computerWorkloadGlobal
+          ;;show "praktycznie workload"
+          ;;show workload
+
         ][
          set color red
         ]]
-      ask computers in-radius 1 with [ color = grey] [
+      ask computers in-radius 2 with [ color = grey or color = white] [
         ifelse  timeLeft > 0[
-          set timeLeft timeLeft - 1 ]
+          set timeLeft timeLeft - 1
+          ;;show timeLeft
+        set color white
+        set workload 10]
         [set color green
-          set workload 10
-        ask tasks in-radius 1 with [color = white or color = blue][
+
+        ask tasks in-radius 2 with [color = white or color = blue][
             set color blue
             if timeLeftTask > 0[
-            set timeLeftTask timeLeftTask - 1  ]]]]
-      ask computers in-radius 1 with [ color = green or color = yellow] [
-        ask tasks in-radius 1  [
+            set timeLeftTask timeLeftTask - 1  ]
+
+
+      ]]]
+      ask computers in-radius 2 with [ color = white][
+       ask tasks in-radius 2  [
+          set color blue]]
+      ask computers in-radius 2 with [ color = green or color = yellow] [
+        ask tasks in-radius 2  [
              set color blue
           if timeLeftTask > 0[
              set timeLeftTask timeLeftTask - 1]
 
           if timeLeftTask = 0[  set color red  ]]]]
 
-     ask computers in-radius 1 [
-        ask tasks in-radius 1 with [color = red][
+     ask computers in-radius 2 [
+        set computerWorkloadGlobal 0
+        ask tasks in-radius 2 with [color = red][
          set computerWorkloadGlobal difficulty * 10
         ]
 
          set workload workload - computerWorkloadGlobal
-      show workload
+      if workload < 10 [
+        set workload 10
+      ]
+     ; ;;show workload
     ]
     ask tasks with [color = white][
       forward 0.1
       ]
-  ask computers[
-      if not any? tasks in-radius 2[
-        set workload 10
-         show workload
-    ]]
+
 
   ]
 
@@ -107,14 +180,15 @@ to taskGenerate
       setxy -8 0
      set color green
       set shape "square"
-      set heading angle
+
       set difficulty random 3
       set difficulty difficulty + 1
-      ;show difficulty
+      set size difficulty * 0.5
+      ;;;show difficulty
       set timeLeftTask random difficulty
-      set timeLeftTask timeLeftTask + 1
+      set timeLeftTask timeLeftTask + 10
       set timeLeftTask timeLeftTask * 10
-      ;show timeLeftTask
+      ;;;show timeLeftTask
 
     ]
   ]
@@ -122,23 +196,37 @@ to taskGenerate
 end
 to sendTask
   ;wysyła do najmnijeobciążonego włączonego komputera o obiążeniu mniejszymn niż podane
+  ;;;show count computers with [color = grey]
+  if count computers with [color = grey] = computersNum[
+    ;;;show "aa"
+    ask tasks with [color = green][
+      face computer 1
+      set color white
+
+    ]
+  ]
   set possitionOfMinWorkload min-one-of computers with [color != yellow] [workload]
+
   ifelse   possitionOfMinWorkload != nobody  [
     ask tasks with [color = green][
-      if min-one-of computers with [color = green] [workload] != nobody[
-      face min-one-of computers with [color = green] [workload]
-      set color white
-      ]
+      ifelse min-one-of computers with [color = green or color = white] [workload] != nobody[
+      face min-one-of computers with [color = green or color = white] [workload]
+        set color white
+       ;;;show "aa"
+
+      ][
       if min-one-of computers with [color = grey] [workload] != nobody[
-      face min-one-of computers with [color = grey] [workload]]
-      set color white
+      face min-one-of computers with [color = grey] [nr]]
+        set color white]
     ]][
     ask tasks with [color = green][
-      face min-one-of computers with [color = yellow] [workload]
-      set color white
-      if min-one-of computers with [color = green or color = yellow or color = grey] = nobody[
 
-      ]
+      face min-one-of computers with [color = yellow] [workload]
+
+      ifelse min-one-of computers with [color != red][workload] = nobody[
+         set color red
+      ][set color white]
+
     ]
 
   ]
@@ -223,6 +311,39 @@ NIL
 NIL
 NIL
 1
+
+INPUTBOX
+418
+158
+573
+218
+limit1
+50.0
+1
+0
+Number
+
+INPUTBOX
+531
+66
+772
+126
+computersNum
+4.0
+1
+0
+Number
+
+INPUTBOX
+216
+57
+371
+117
+timeToturnOff
+10.0
+1
+0
+Number
 
 @#$#@#$#@
 ## WHAT IS IT?
