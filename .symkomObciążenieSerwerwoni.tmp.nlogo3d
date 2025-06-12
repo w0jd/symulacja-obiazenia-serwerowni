@@ -76,6 +76,14 @@ to workLoadStatusUpdate
   ;;show "aaab"
 end
 to Step
+  if allwaysOn = True[
+    ask computers[
+    set color green
+    set workload 10
+
+    ]
+  ]
+
    if timeToturnOff <= 0[
     set timeToturnOff 0
    ]
@@ -98,7 +106,17 @@ to Step
     set color grey
   ]
   workLoadStatusUpdate
-   sendTask
+  if strategy = "max"[
+    sendTaskToMax]
+  if strategy ="min"[
+    sendTask
+  ]
+  if strategy = "random"[
+  sendTaskToRandom
+  ]
+  if strategy ="random"[]
+
+  ask tasks with [xcor > 5][die]
   ask  tasks  [
 
     if  any? computers in-radius 2  [
@@ -231,6 +249,82 @@ to sendTask
 
   ]
 end
+to sendTaskToMax
+  ;wysyła do najbarziejbciążonego włączonego komputera o obiążeniu mniejszymn niż podane
+  ;;;show count computers with [color = grey]
+  if count computers with [color = grey] = computersNum[
+    ;;;show "aa"
+    ask tasks with [color = green][
+      face computer 1
+      set color white
+
+    ]
+  ]
+  set possitionOfMinWorkload max-one-of computers with [color != yellow] [workload]
+
+  ifelse   possitionOfMinWorkload != nobody  [
+    ask tasks with [color = green][
+      set computerWorkloadGlobal difficulty * 10
+      ifelse max-one-of computers with [(color = green or color = white)] [workload] != nobody[
+      face max-one-of computers with [(color = green or color = white) ] [workload]
+        set color white
+       ;;;show "aa"
+
+      ][
+      if max-one-of computers with [color = grey ] [workload] != nobody[
+      face max-one-of computers with [color = grey] [nr]]
+        set color white]
+    ]][
+    ask tasks with [color = green][
+
+      face max-one-of computers with [color = yellow and workload + (computerWorkloadGlobal * 10) < 100] [workload]
+
+      ifelse max-one-of computers with [color != red][workload] = nobody[
+         set color red
+      ][set color white]
+
+    ]
+
+  ]
+end
+to sendTaskToRandom
+  ;wysyła do najbarziejbciążonego włączonego komputera o obiążeniu mniejszymn niż podane
+  ;;;show count computers with [color = grey]
+  if count computers with [color = grey] = computersNum[
+    ;;;show "aa"
+    ask tasks with [color = green][
+      face computer 1
+      set color white
+
+    ]
+  ]
+  set possitionOfMinWorkload one-of computers with [color != yellow]
+
+  ifelse   possitionOfMinWorkload != nobody  [
+    ask tasks with [color = green][
+      set computerWorkloadGlobal difficulty * 10
+      ifelse one-of computers with [(color = green or color = white)] != nobody[
+      face one-of computers with [(color = green or color = white) ]
+        set color white
+       ;;;show "aa"
+
+      ][
+      if one-of computers with [color = grey ] != nobody[
+      face one-of computers with [color = grey]
+        set color white]
+  ]]][
+    ask tasks with [color = green][
+
+      face one-of computers with [color = yellow]
+
+      ifelse one-of computers with [color != red] = nobody[
+         set color red
+      ][set color white]
+
+    ]
+
+  ]
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 0
@@ -318,7 +412,7 @@ INPUTBOX
 573
 218
 limit1
-50.0
+90.0
 1
 0
 Number
@@ -329,7 +423,7 @@ INPUTBOX
 772
 126
 computersNum
-4.0
+6.0
 1
 0
 Number
@@ -344,6 +438,27 @@ timeToturnOff
 1
 0
 Number
+
+CHOOSER
+507
+253
+645
+298
+strategy
+strategy
+"max" "min" "random"
+2
+
+SWITCH
+69
+70
+181
+103
+allwaysOn
+allwaysOn
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
