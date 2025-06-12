@@ -225,7 +225,7 @@ to sendTask
   if count computers with [color = grey] = computersNum[
     ;;;show "aa"
     ask tasks with [color = green][
-      face computer 1
+      face computer 0
       set color white
 
     ]
@@ -430,7 +430,7 @@ INPUTBOX
 772
 126
 computersNum
-6.0
+8.0
 1
 0
 Number
@@ -441,7 +441,7 @@ INPUTBOX
 371
 117
 timeToturnOff
-15.0
+10.0
 1
 0
 Number
