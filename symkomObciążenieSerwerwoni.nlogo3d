@@ -29,7 +29,8 @@ timeLeft
 ]
 to Setup
 
-
+   set-current-plot "avrage workload "
+  clear-plot
   set tymczas 0
   if computersNum < 1
   [
@@ -76,6 +77,12 @@ to workLoadStatusUpdate
   ;;show "aaab"
 end
 to Step
+  set-current-plot "avrage workload "
+  ifelse any? computers with[color != grey][
+    plot (sum [  workload ] of computers / count computers)
+  ] [
+    plot 0
+  ]
   if allwaysOn = True[
     ask computers[
     set color green
@@ -390,10 +397,10 @@ NIL
 1
 
 BUTTON
-365
-273
-428
-306
+251
+317
+314
+350
 NIL
 Step
 NIL
@@ -412,7 +419,7 @@ INPUTBOX
 573
 218
 limit1
-90.0
+50.0
 1
 0
 Number
@@ -434,7 +441,7 @@ INPUTBOX
 371
 117
 timeToturnOff
-10.0
+15.0
 1
 0
 Number
@@ -447,7 +454,7 @@ CHOOSER
 strategy
 strategy
 "max" "min" "random"
-2
+1
 
 SWITCH
 69
@@ -459,6 +466,24 @@ allwaysOn
 1
 1
 -1000
+
+PLOT
+218
+306
+418
+456
+avrage workload 
+NIL
+NIL
+0.0
+1000.0
+0.0
+100.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count turtles"
 
 @#$#@#$#@
 ## WHAT IS IT?
