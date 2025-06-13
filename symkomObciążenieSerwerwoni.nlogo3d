@@ -1,7 +1,7 @@
 globals[
 
 limit2
-
+ workloadAVG
   didGenerate
   angle
   tymczas
@@ -9,7 +9,7 @@ choosenComputer
 computerWorkloadGlobal
 possitionOfMinWorkload
   computersNum2
-
+  consumption
 ]
 breed [computers computer]
 breed [tasks task]
@@ -30,6 +30,10 @@ timeLeft
 to Setup
 
    set-current-plot "avrage workload "
+  clear-plot
+     set-current-plot "number of computers"
+  clear-plot
+  set-current-plot "energy consumption"
   clear-plot
   set tymczas 0
   if computersNum < 1
@@ -80,11 +84,45 @@ to Step
   set-current-plot "avrage workload "
   ifelse any? computers with[color != grey][
     plot (sum [  workload ] of computers / count computers)
+    set workloadAVG ((sum [  workload ] of computers / count computers) + workloadAVG) / 2
   ] [
     plot 0
+    set workloadAVG 0
   ]
+
+    set-current-plot "number of computers"
+  ifelse any? computers with[color != grey][
+
+    set-current-plot-pen "all active computers"
+    plot count computers with[color = green or  color = yellow]
+
+         set-current-plot-pen "yellow computers"
+   plot count computers with[color = yellow]
+    if workloadEnegyRelation = "linear"[
+      set consumption  sum [  workload ] of computers
+    ]
+    if  workloadEnegyRelation = "cubic"[
+      set consumption  (sum [  workload ]  of computers * 0.1 ) ^ 2
+    ]
+    if workloadEnegyRelation = "exponential"[
+      set consumption  (1.012 ^ sum [  workload ]  of computers )
+    ]
+     if workloadEnegyRelation = "logarithimc"[
+      set consumption  ln (sum [  workload ]  of computers * 10 )
+    ]
+  ] [
+    set consumption 0
+    set-current-plot-pen "all active computers"
+   plot 0
+    set-current-plot-pen "yellow computers"
+    plot 0
+
+  ]
+   set-current-plot "energy consumption"
+  plot consumption
+
   if allwaysOn = True[
-    ask computers[
+    ask computers with [color = grey or color = white][
     set color green
     set workload 10
      set timeToturnOff2 timeToturnOff
@@ -414,23 +452,12 @@ NIL
 1
 
 INPUTBOX
-418
-158
-573
-218
+353
+146
+508
+206
 limit1
-50.0
-1
-0
-Number
-
-INPUTBOX
-531
-66
-772
-126
-computersNum
-8.0
+60.0
 1
 0
 Number
@@ -447,14 +474,14 @@ timeToturnOff
 Number
 
 CHOOSER
-507
-253
-645
-298
+982
+209
+1120
+254
 strategy
 strategy
 "max" "min" "random"
-1
+2
 
 SWITCH
 69
@@ -463,7 +490,7 @@ SWITCH
 103
 allwaysOn
 allwaysOn
-1
+0
 1
 -1000
 
@@ -479,6 +506,78 @@ NIL
 1000.0
 0.0
 100.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot count turtles"
+
+PLOT
+944
+152
+1541
+415
+number of computers
+NIL
+NIL
+0.0
+100.0
+0.0
+6.0
+true
+true
+"clear-all-plots\n" ""
+PENS
+"all active computers" 1.0 0 -16777216 true "" "plot count computers with [color = green or color = yellow]"
+"yellow computers" 1.0 0 -1184463 true "" "plot count computers with [color = yellow]"
+
+CHOOSER
+607
+281
+745
+326
+strategy
+strategy
+"min" "max" "random"
+2
+
+SLIDER
+694
+201
+866
+234
+computersNum
+computersNum
+0
+7
+7.0
+1
+1
+NIL
+HORIZONTAL
+
+CHOOSER
+682
+456
+836
+501
+workloadEnegyRelation
+workloadEnegyRelation
+"linear" "exponential" "logarithimc" "cubic"
+1
+
+PLOT
+348
+504
+548
+654
+energy consumption
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
 true
 false
 "" ""
